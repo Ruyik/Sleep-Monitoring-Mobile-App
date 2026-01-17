@@ -1,0 +1,249 @@
+#:kivy 2.1.0
+
+# ----------------------------
+# Theme colors (single source)
+# ----------------------------
+#:set COLOR_PRIMARY (0.2, 0.5, 1, 1)
+#:set COLOR_ACCENT (0.95, 0.65, 0.3, 1)
+#:set COLOR_BACKGROUND (0.98, 0.98, 1, 1)
+#:set COLOR_TEXT (0, 0, 0, 1)  # NEAR BLACK
+
+
+
+# ----------------------------
+# Gradient Background widget (Modified for Horizontal Split)
+# ----------------------------
+<GradientBackground@Widget>:
+    canvas.before:
+        # 1. Top Half (Lighter Blue/White: #E0F2F7 -> 0.878, 0.949, 0.969, 1)
+        Color:
+            rgba: 0.878, 0.949, 0.969, 1
+        Rectangle:
+            pos: self.x, self.y + self.height/2
+            size: self.width, self.height/2
+
+        # 2. Bottom Half (Darker Blue: #90CAF9 -> 0.56, 0.79, 0.98, 1)
+        Color:
+            rgba: 0.56, 0.79, 0.98, 1
+        Rectangle:
+            pos: self.x, self.y
+            size: self.width, self.height/2
+
+# ----------------------------
+# Sleeping Character Decoration Widget (for Tips Screen)
+# ----------------------------
+<SleepingCharacter@Widget>:
+    opacity: 0.15
+    canvas:
+        # Large Moon (Yellow/White) - Moved slightly left to clear center
+        Color:
+            rgba: 1, 1, 0.8, 1
+        Ellipse:
+            pos: self.x + self.width * 0.4, self.y + self.height * 0.7
+            size: dp(70), dp(70)
+
+        # Cloud 1 (White) - Moved to the left corner
+        Color:
+            rgba: 1, 1, 1, 1
+        Ellipse:
+            pos: self.x + self.width * 0.05, self.y + self.height * 0.8
+            size: dp(60), dp(35)
+        Ellipse:
+            pos: self.x + self.width * 0.1, self.y + self.height * 0.85
+            size: dp(40), dp(25)
+
+        # Star 1 (White)
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.x + self.width * 0.85, self.y + self.height * 0.65
+            size: dp(6), dp(6)
+
+        # Star 2 (White)
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.x + self.width * 0.15, self.y + self.height * 0.7
+            size: dp(8), dp(8)
+
+        # Star 3 (White)
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.x + self.width * 0.55, self.y + self.height * 0.9
+            size: dp(4), dp(4)
+
+
+# ----------------------------
+# Screen Header (Title only)
+# ----------------------------
+<ScreenHeader@BoxLayout>:
+    title: ""
+    back_screen: "home" # Property is still needed for AppScreen
+    orientation: "horizontal"
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(12)
+    spacing: dp(10)
+
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2
+        RoundedRectangle:
+            radius: [20]
+            pos: self.pos
+            size: self.size
+
+    Widget:
+        size_hint_x: None
+        width: dp(80)
+
+    Label:
+        text: root.title
+        bold: True
+        font_size: '20sp'
+        size_hint_x: 1.0
+        halign: "center"
+        valign: "middle"
+        text_size: self.size
+        color: COLOR_TEXT
+
+    Widget:
+        size_hint_x: None
+        width: dp(80)
+
+# ----------------------------
+# Reusable IOSButton (defined only here)
+# ----------------------------
+<IOSButton@Button>:
+    background_normal: ""
+    background_color: COLOR_PRIMARY
+    color: 1, 1, 1, 1
+    font_size: '16sp'
+    size_hint_y: None
+    height: dp(50)
+    bold: True
+    padding: [dp(12), dp(8)]
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            radius: [14]
+            pos: self.pos
+            size: self.size
+    # subtle press visual (no Python expression rewriting COLOR_PRIMARY)
+    on_press:
+        self.background_color = (COLOR_PRIMARY[0]*0.85, COLOR_PRIMARY[1]*0.85, COLOR_PRIMARY[2]*0.85, 1)
+    on_release:
+        self.background_color = COLOR_PRIMARY
+
+# ----------------------------
+# IOS Card (defined only here)
+# ----------------------------
+<IOSCard@BoxLayout>:
+    orientation: "horizontal"
+    padding: dp(14)
+    spacing: dp(12)
+    size_hint_y: None
+    height: dp(120)
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.12
+        RoundedRectangle:
+            radius: [20]
+            pos: self.pos
+            size: self.size
+
+# ----------------------------
+# Global TextInput style (Cleaned for AuthInput fix)
+# ----------------------------
+<TextInput>:
+    # FIX 1: Change texture source to empty string
+    background_normal: ''
+    background_active: ''
+
+    # FIX 2: Set explicit background color (Light Gray default)
+    background_color: 0.9, 0.9, 0.9, 0.95
+
+    # ❌ IMPORTANT: ALL COLOR AND CURSOR PROPERTIES ARE REMOVED/CLEANED HERE
+    # These properties must now be set only in AuthInput in main.kv to prevent bugs.
+
+    multiline: False
+
+    # Use minimal default padding to prevent any vertical/horizontal clipping
+    padding: [dp(10), dp(10), dp(10), dp(10)]
+
+    canvas.before:
+        Color:
+            # FIX 3: Draw the rounded rectangle based on the new background_color
+            rgba: self.background_color
+        RoundedRectangle:
+            radius: [8]
+            pos: self.pos
+            size: self.size
+
+# ----------------------------
+# Dashboard Title Label
+# ----------------------------
+<DashboardTitleLabel@Label>:
+    font_size: '14sp'
+    color: COLOR_TEXT
+    size_hint_y: None
+    height: dp(25)
+
+# ----------------------------
+# New Dashboard Metric Card Style
+# ----------------------------
+<DashboardMetricCard@BoxLayout>:
+    icon_source: ""
+
+    orientation: "vertical"
+    padding: [dp(10), dp(0), dp(10), dp(0)]
+    spacing: dp(2)
+    size_hint_y: 1
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.1
+        RoundedRectangle:
+            radius: [dp(12)]
+            pos: self.pos
+            size: self.size
+
+    # Inner BoxLayout starts here
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(0)
+
+        # 1. Image/Icon at the Top
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'center'
+            size_hint_y: None
+            height: dp(30)
+
+            Image:
+                source: root.icon_source
+                size_hint: None, None
+                size: dp(150), dp(150)
+                allow_stretch: False
+                keep_ratio: True
+
+        # 2. Metric Title (Label 1)
+        Label:
+            color: 0,0,0,1
+            font_size: '14sp'
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: -dp(4)
+            halign: 'center'
+            valign: 'middle'
+
+        # 3. Metric Value (Label 2)
+        Label:
+            color: 0,0,0,1
+            font_size: '42sp'
+            bold: True
+            size_hint_y: None
+            height: dp(45)
+            halign: 'center'
+            valign: 'middle'

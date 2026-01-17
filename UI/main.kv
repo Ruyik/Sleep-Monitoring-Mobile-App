@@ -1,0 +1,1419 @@
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+#:kivy 2.1.0
+
+<AuthInput@TextInput>:
+    size_hint_y: None
+    height: dp(48)
+    # FIX: Use minimal padding to prevent clipping (from testing)
+    padding: [dp(10), dp(10), dp(10), dp(10)]
+    font_size: '16sp'
+
+    # 1. Hide Kivy's default opaque background texture
+    background_normal: ''
+    background_active: ''
+    background_color: 0, 0, 0, 0 # Make default background transparent
+
+    # 2. Text is DARK BLACK (This is the color your system is now reliably rendering)
+    foreground_color: 0, 0, 0, 1
+    hint_text_color: 0, 0, 0, 0.7
+    cursor_color: 0, 0, 0, 1
+
+    multiline: False
+    halign: 'left'
+    valign: 'middle' # Ensure vertical alignment is correct
+
+    # 3. Z-ORDER FIX: Draw the custom box in the background layer (canvas.before)
+    # This draws the box *underneath* the text.
+    canvas.before:
+        Color:
+            # Draw the light grey box (0.92, 0.92, 0.92) fully opaque (1.0)
+            rgba: 0, 0, 0, 0.4
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
+
+ScreenManager:
+    id: screen_manager
+    transition: SlideTransition()
+
+
+# ----------------------------
+# INTRO SCREEN (First Page)
+# ----------------------------
+<IntroScreen@Screen>:
+    name: "intro"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(36)
+        spacing: dp(15)
+
+        # Spacer to center content vertically
+        Widget:
+            size_hint_y: 0.1
+
+        # Title
+        Label:
+            text: "Welcome to Smart Sleep"
+            font_size: '30sp'
+            bold: True
+            color: 0.6,0.4,0.8,1
+            size_hint_y: None
+            height: dp(50)
+            halign: 'center'
+            valign: 'middle'
+
+        # Icon (AnchorLayout for centering the image)
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'center'
+            size_hint_y: None
+            height: dp(140) # Space for a large icon
+
+            Image:
+                # Use your existing sleep icon path
+                source: "UI/images/intro.png"
+                size_hint: None, None
+                size: dp(120), dp(120) # Size of the icon
+                allow_stretch: True
+                keep_ratio: True
+
+        # Subtitle
+        Label:
+            text: "Your journey to optimized rest starts here."
+            font_size: '18sp'
+            color: 0,0,0,0.6
+            size_hint_y: None
+            height: dp(40)
+            opacity: 0.8 # Slightly muted text
+
+        # Buttons Container
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(130)
+            spacing: dp(15)
+            padding: [dp(10), dp(0), dp(10), dp(0)]
+
+            IOSButton:
+                text: "Log In"
+                on_release: app.switch("login")
+
+            IOSButton:
+                text: "Register"
+                on_release: app.switch("register")
+
+        # Spacer to push everything up slightly
+        Widget:
+            size_hint_y: 0.2
+
+
+# ----------------------------
+# LOGIN SCREEN
+# ----------------------------
+<LoginScreen@Screen>:
+    name: "login"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: (1, 1)
+        padding: dp(36)
+        spacing: dp(16)
+
+        # Spacer to push content down
+        Widget:
+            size_hint_y: 1.5
+
+        Label:
+            text: "Sign In to Your Account"
+            font_size: '26sp'
+            bold: True
+            color: 0.6,0.4,0.8,1
+            size_hint_y: None
+            height: dp(60)
+            halign: 'center'
+            valign: 'middle'
+
+        AuthInput:
+            id: username_input
+            hint_text: "Username"
+            multiline: False
+
+
+        AuthInput:
+            id: password_input
+            hint_text: "Password"
+            multiline: False
+            password: True
+
+
+        IOSButton:
+            text: "Log In"
+            on_release: app.handle_login(username_input.text, password_input.text)
+
+        Label:
+            id: status_lbl
+            text: "Please log in."
+            color: 0.6, 0.4, 0.8, 0.9
+            size_hint_y: None
+            height: dp(30)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+
+        # Spacer to push Forgot Password to bottom
+        Widget:
+            size_hint_y: 1.5
+
+        # Forgot Password Link
+        Button:
+            text: "[u]Forgot Password?[/u]"
+            background_normal: ''
+            background_color: 0,0,0,0
+            color: 0.1,0.1,0.1,1
+            size_hint_y: None
+            height: dp(30)
+            on_release: app.switch("forgot_password")
+            markup: True
+
+        Widget:
+            size_hint_y: 0.2 # Small final buffer
+
+# ----------------------------
+# REGISTER SCREEN
+# ----------------------------
+<RegisterScreen@Screen>:
+    name: "register"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: (1, 1)
+        padding: dp(36)
+        spacing: dp(16)
+
+        Widget:
+            size_hint_y: 0.5
+
+        Label:
+            text: "Create Account"
+            font_size: '26sp'
+            bold: True
+            color: 0.6, 0.4, 0.8, 1 # Global dark color
+            size_hint_y: None
+            height: dp(60)
+
+        # Inputs now correctly inherit dark text color from global TextInput style (via AuthInput)
+        AuthInput:
+            id: reg_username
+            hint_text: "Username"
+            multiline: False
+
+        AuthInput:
+            id: reg_email
+            hint_text: "Email"
+            multiline: False
+
+        AuthInput:
+            id: reg_password
+            hint_text: "Password"
+            multiline: False
+            password: True
+
+
+        IOSButton:
+            text: "Register"
+            on_release: app.handle_register(reg_username.text, reg_email.text, reg_password.text)
+
+        Label:
+            id: status_lbl
+            text: "Enter your details."
+            color: COLOR_TEXT # Global dark color
+            size_hint_y: None
+            height: dp(30)
+
+        Widget:
+            size_hint_y: 1
+
+        Button:
+            text: "Back to Login"
+            background_normal: ''
+            background_color: 0,0,0,0
+            color: COLOR_TEXT # Global dark color
+            size_hint_y: None
+            height: dp(40)
+            on_release: app.switch("login")
+
+# ----------------------------
+# FORGOT PASSWORD SCREEN
+# ----------------------------
+<ForgotPasswordScreen@Screen>:
+    name: "forgot_password"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(36)
+        spacing: dp(16)
+
+        Widget:
+            size_hint_y: 0.2
+
+        Label:
+            text: "Password Reset"
+            font_size: '26sp'
+            bold: True
+            color: 0.6,0.4,0.8,1
+            size_hint_y: None
+            height: dp(60)
+
+        Label:
+            text: "Enter your registered email address to receive a password reset link."
+            font_size: '18sp'
+            color: 0.6,0.4,0.8,0.9
+            size_hint_y: None
+            height: dp(40)
+            text_size: self.width, None
+            halign: 'center'
+
+        Widget:
+            size_hint_y: 0.05
+
+        AuthInput:
+            id: reset_email
+            hint_text: "Registered Email"
+            multiline: False
+
+        # --- ADDED SPACER TO PUSH BUTTON DOWN ---
+        Widget:
+            size_hint_y: 0.1
+
+        IOSButton:
+            text: "Send Reset Link"
+            on_release: app.handle_forgot_password(reset_email.text)
+
+        Label:
+            id: status_lbl
+            text: ""
+            color: 0, 0, 0, 0.8
+            size_hint_y: None
+            height: dp(40)
+
+        Widget:
+            size_hint_y: 0.5
+
+        Button:
+            text: "Back to Login"
+            background_normal: ''
+            background_color: 0,0,0,0
+            color: 0,0,0,0.7
+            size_hint_y: None
+            on_release: app.switch("login")
+            markup: True
+
+
+<BarChartColumn>:
+    # This widget holds one Bar and one Date Label
+    orientation: 'vertical'
+    size_hint_x: None # FIX: Must be None to allow horizontal scrolling
+    width: dp(60)     # Fixed width for each column
+    score: 0
+    date_label: ""
+
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 0  # fully transparent
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # --- 1. Top Spacer (Aligns bar height relative to its score) ---
+    Widget:
+        # Pushes the bar up (100% score = 0 height spacer)
+        size_hint_y: (100 - root.score) / 100 if root.score > 0 else 1
+
+    # --- 2. Score Percentage Label (NEW POSITION: Top of the Bar) ---
+    Label:
+        # 🚨 FIX: This label now sits immediately above the bar widget
+        text: str(int(root.score)) + '%'
+        size_hint_y: None
+        height: dp(20) # Fixed height for the text
+        font_size: '15sp'
+        color: 0.1, 0.1, 0.1, 1
+
+    # --- 3. Bar Chart Element ---
+    Widget:
+        # The bar height is determined by the score (0% = 0 height, 100% = max height)
+        # This widget is now smaller to make vertical space for the score label above it.
+        size_hint_y: root.score / 100 if root.score > 0 else 0.001
+
+        canvas.before:
+            Color:
+                # Calls the Python method get_score_color (must be defined on ConsistencyScreen)
+                rgba: app.root.get_screen('consistency').get_score_color(root.score)
+            RoundedRectangle:
+                pos: self.x, self.y
+                size: self.size
+                radius: [dp(4), dp(4), 0, 0] # Rounded top corners
+
+    # --- 4. Date Label (X-Axis Label - Remains at the bottom) ---
+    Label:
+        text: root.date_label
+        size_hint_y: None
+        height: dp(20)
+        font_size: '15sp'
+        color: 0.1, 0.1, 0.1, 1
+
+<ConsistencyHeatBar@BoxLayout>:
+    # This is the CONTAINER (the widget that holds the dynamic columns)
+    scores: []
+    padding: dp(10), dp(5)
+    spacing: dp(10)
+    size_hint_y: None
+    height: dp(50)
+
+    canvas.before:
+        Color:
+            rgba: 1, 0, 0, 0 # Explicitly ensure the default box background is transparent
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # This block generates the BarChartColumn widgets when the scores property is set
+    on_scores:
+        self.clear_widgets()
+        from kivy.factory import Factory
+        # The Python update_consistency function provides (score, date_label) tuples
+        for score, date_label in root.scores: self.add_widget(Factory.BarChartColumn(score=score, date_label=date_label))
+
+<TipCard@BoxLayout>:
+    # Properties used for setting content dynamically
+    tip_icon_source: ""
+    tip_title: "Tip Title"
+    tip_text: "Tip Description"
+
+    orientation: "vertical"
+    padding: dp(10)
+    spacing: dp(8)
+    size_hint_y: None
+    height: dp(230) # FIX: Increased height for better text wrapping
+    canvas.before:
+        Color:
+            rgba: 0.6, 0.4, 0.8, 0.15 # Slightly brighter card background
+        RoundedRectangle:
+            radius: [dp(16)]
+            pos: self.pos
+            size: self.size
+
+    # Area for the static image (PNG)
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+        size_hint_y: 0.55
+        size_hint_x: 1.0
+
+        Image:
+            source: root.tip_icon_source
+            size_hint: 1, 1
+            allow_stretch: False # Prevents shrinking/compression
+            keep_ratio: True
+
+
+    # Area for the text content
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_y: 0.45
+        padding: [dp(4), 0, dp(4), dp(8)]
+        spacing: dp(2) # FIX: Reduced spacing between title and text
+
+        Label:
+            text: root.tip_title
+            font_size: '14sp' # FIX: Significantly reduced font size to prevent clipping on narrow cards
+            bold: True
+            color: 0.6,0.4,0.8,1
+            size_hint_y: None
+            height: dp(20) # Min height for smaller font
+            text_size: self.width, None
+            halign: 'center'
+            valign: 'middle'
+
+        Label:
+            text: root.tip_text
+            font_size: '14sp'
+            color: 0.6,0.4,0.8,1
+            text_size: self.width, None
+            halign: 'center'
+            valign: 'top'
+            height: self.texture_size[1]
+            size_hint_y: None
+
+
+
+# ----------------------------
+# Base App Screen Template (Header + content)
+# ----------------------------
+<AppScreen@Screen>:
+    title: "Screen Title"
+    back_screen: "home"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        ScreenHeader:
+            title: root.title
+            color: 0.6, 0.4, 0.8, 1
+            back_screen: root.back_screen
+
+        BoxLayout:
+            id: content_area
+            orientation: 'vertical'
+            padding: dp(20)
+            spacing: dp(16)
+
+<HomeScreen@Screen>:
+    name: "home"
+    GradientBackground:
+
+    # Safety wrapper for small screens/PyCharm windows
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+
+        BoxLayout:
+            orientation: 'vertical'
+            # 1. ADD TOP PADDING to clear the Exit button
+            padding: [dp(20), dp(70), dp(20), dp(20)]
+            # 2. REDUCED SPACING for a tighter look
+            spacing: dp(10)
+            size_hint_y: None
+            height: self.minimum_height
+
+            # --- HEADER AREA ---
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: dp(65)
+                spacing: dp(10)
+
+                Image:
+                    source: "UI/images/sleep_icon.png"
+                    size_hint: None, None
+                    size: dp(55), dp(55)
+                    pos_hint: {'center_y': .5}
+
+                Label:
+                    text: "Lifestyle Adjustment for Optimized Sleep"
+                    font_size: '18sp'
+                    bold: True
+                    color: 0.6, 0.4, 0.8, 1
+                    size_hint_x: 1.0
+                    halign: 'center'
+                    valign: 'middle'
+                    text_size: self.width, None
+
+            # --- GIF AREA ---
+            AnchorLayout:
+                anchor_x: 'center'
+                anchor_y: 'center'
+                size_hint_y: None
+                height: dp(220)  # ENLARGED fixed area
+
+                Image:
+                    source: "UI/images/your_animation.gif"
+                    anim_delay: 0.1
+                    size_hint: None, None
+                    size: dp(220), dp(180)  # ENLARGED image
+                    allow_stretch: True
+                    keep_ratio: True
+
+            # --- JOURNEY TEXT ---
+            Label:
+                text: "Your journey to better sleep starts here."
+                font_size: '18sp'
+                color: 0, 0, 0, 0.7
+                size_hint_y: None
+                height: dp(20)  # TIGHT distance to GIF
+                halign: 'center'
+
+            # --- NAVIGATION CARDS ---
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(12)
+                size_hint_y: None
+                height: self.minimum_height
+
+                # Sleep Schedule Card
+                IOSCard:
+                    Label:
+                        text: "Sleep Schedule"
+                        font_size: '16sp'
+                        bold: True
+                        color: 0.6, 0.4, 0.8, 1
+                    AnchorLayout:
+                        anchor_x: 'right'
+                        IOSButton:
+                            text: "Set Sleep Time"
+                            size_hint: None, None
+                            size: dp(120), dp(44)
+                            on_release: app.switch("schedule")
+
+                # Sleep Tracker Card
+                IOSCard:
+                    Label:
+                        text: "Sleep Tracker"
+                        font_size: '16sp'
+                        bold: True
+                        color: 0.6, 0.4, 0.8, 1
+                    AnchorLayout:
+                        anchor_x: 'right'
+                        IOSButton:
+                            text: "View Progress"
+                            size_hint: None, None
+                            size: dp(120), dp(44)
+                            on_release:
+                                app.switch("consistency")
+                                app.update_consistency()
+
+                # Dashboard Card
+                IOSCard:
+                    Label:
+                        text: "Live Smart Dashboard"
+                        font_size: '16sp'
+                        bold: True
+                        color: 0.6, 0.4, 0.8, 1
+                    AnchorLayout:
+                        anchor_x: 'right'
+                        IOSButton:
+                            text: "View Dashboard"
+                            size_hint: None, None
+                            size: dp(120), dp(44)
+                            on_release: app.switch("dashboard")
+
+    # LAYER 2: OVERLAY EXIT BUTTON (Stays fixed at the top)
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'top'
+        padding: [0, dp(15), dp(15), 0]
+        IOSButton:
+            text: "Exit"
+            on_release: app.stop()
+            size_hint: None, None
+            size: dp(75), dp(40)
+            background_color: 0.9, 0.2, 0.2, 1
+
+# ----------------------------
+# DASHBOARD SCREEN
+# ----------------------------
+<DashboardScreen@AppScreen>:
+    name: "dashboard"
+    title: "Smart Health Dashboard"
+    back_screen: "home"
+
+    GradientBackground:
+        id: bg
+
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        ScreenHeader:
+            title: root.title
+            back_screen: root.back_screen
+
+        BoxLayout:
+            id: content_area
+            orientation: "vertical"
+            spacing: dp(16)
+            padding: [dp(24), dp(16), dp(24), dp(24)]
+
+            Label:
+                text: "Environmental Factors"
+                font_size: '22sp'
+                bold: True
+                color: 0.6,0.4,0.8,1
+                size_hint_y: None
+                height: dp(40)
+
+            # Metric Display Grid
+            GridLayout:
+                cols: 2
+                spacing: dp(16)
+                size_hint_y: 0.6
+
+                # Metric 1: Temperature
+                DashboardMetricCard:
+                    icon_source: "UI/images/thermometer.png"
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            text: "Temperature (°C)"
+                            color: 0,0,0,1
+                        Label:
+                            id: temp_lbl
+                            text: "--"
+                            font_size: "42sp"
+                            bold: True
+                            color: 0,0,0,1
+
+                # Metric 2: Air Quality (AQI)
+                DashboardMetricCard:
+                    icon_source: "UI/images/air_quality.png"
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            text: "Air Quality (AQI)"
+                            color: 0,0,0,1
+                        Label:
+                            id: aqi_lbl
+                            text: "--"
+                            font_size: "42sp"
+                            bold: True
+                            color: 0,0,0,1
+
+            # Metric 3: Fan Speed Display
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(70)
+                spacing: dp(4)
+
+                DashboardTitleLabel:
+                    text: "Current Purifier Speed"
+
+                Label:
+                    id: fan_speed_lbl
+                    text: "Speed: --"
+                    font_size: '20sp'
+                    bold: True
+                    color: 0,0,0,1
+
+            # --- FIX: CENTERED BACK BUTTON ---
+            AnchorLayout:
+                anchor_x: 'center'
+                anchor_y: 'center'
+                size_hint_y: None
+                height: dp(50) # Give it vertical space
+                spacing: dp(12)
+
+                IOSButton:
+                    text: "< Back"
+                    size_hint: None, None # Use fixed size
+                    size: dp(120), dp(40) # Slightly wider button
+                    on_release: app.switch("home", direction='right')
+
+            # MQTT Status
+            Label:
+                id: status_lbl
+                text: "MQTT: Connecting..."
+                font_size: '12sp'
+                size_hint_y: None
+                height: dp(30)
+                halign: "center"
+                valign: "middle"
+                color: 0,0,0,0.7
+
+# ----------------------------
+# SLEEP SCHEDULE SCREEN (uses TimePicker)
+# ----------------------------
+<SleepScheduleScreen@AppScreen>:
+    name: "schedule"
+    title: "Set Sleep Time"
+    back_screen: "home" # Ensure this is set for header navigation
+
+    GradientBackground:
+        id: bg
+    FloatLayout:
+        # Main BoxLayout wrapper (Draws the ScreenHeader and controls vertical space)
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [0, 0, 0, dp(20)]
+            size_hint: 1, 1
+
+            # 1. ScreenHeader (Title) - Fixed height
+            ScreenHeader:
+                title: root.title
+
+            # 2. Content Container (FLEXIBLE SPACE for Picker)
+            BoxLayout:
+                id: picker_area
+                orientation: "vertical"
+                spacing: dp(30)
+                padding: dp(30)
+                size_hint_y: 1 # Takes up all available space
+
+                # --- TOP TEXT ---
+                Label:
+                    text: "Select your sleep time:"
+                    font_size: dp(30)
+                    bold: True
+                    color: 0.6,0.4,0.8,1
+                    size_hint_y: None
+                    height: 50
+
+                # --- TIME PICKER ---
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(20)
+                    size_hint_y: None
+                    height: dp(250)
+                    pos_hint: {'center_x': 0.5}
+
+                    # ---------------- Hour Picker ----------------
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(10)
+                        size_hint_x: 0.33
+                        # ... (rest of Hour Picker)
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.increment_hour()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/up.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            id: hour_label
+                            text: "10"
+                            font_size: dp(45)
+                            halign: "center"
+                            valign: "middle"
+                            text_size: self.size
+                            color: 0,0,0,1
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.decrement_hour()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/down.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                    # ---------------- Minute Picker ----------------
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(10)
+                        size_hint_x: 0.33
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.increment_minute()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/up.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            id: minute_label
+                            text: "00"
+                            font_size: dp(45)
+                            halign: "center"
+                            valign: "middle"
+                            text_size: self.size
+                            color: 0,0,0,1
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.decrement_minute()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/down.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                    # ---------------- AM/PM Picker ----------------
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(10)
+                        size_hint_x: 0.33
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.toggle_ampm()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/up.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            id: ampm_label
+                            text: "AM"
+                            font_size: dp(45)
+                            halign: "center"
+                            valign: "middle"
+                            text_size: self.size
+                            color: 0,0,0,1
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(80), dp(80)
+                            pos_hint: {'center_x': 0.5}
+                            background_normal: ''
+                            background_color: 0,0,0,0
+                            on_release: app.toggle_ampm()
+                            canvas.before:
+                                Rectangle:
+                                    source: "UI/icons/down.png"
+                                    pos: self.pos
+                                    size: self.size
+
+                # --- SPACER: Pushes content up ---
+                Widget: # Invisible spacer to push the content (pickers) to the top of the flexible area
+                    size_hint_y: 0.2
+
+            # 3. Bottom Button Area (Fixed height, anchored to the bottom)
+            BoxLayout:
+                size_hint_y: None
+                height: dp(80) # Height for Confirm button
+                padding: [dp(40), dp(0), dp(40), dp(20)] # Bottom padding
+
+                IOSButton:
+                    text: "Confirm Sleep Time"
+                    font_size: dp(20)
+                    on_release: app.save_sleep_time(f"{hour_label.text}:{minute_label.text} {ampm_label.text}")
+
+
+        IOSButton:
+            text: "< Back"
+            size_hint: None, None
+            size: dp(80), dp(35)
+            font_size: dp(14)
+            on_release: app.switch("home", direction='right')
+            pos_hint: {'x': 0.03, 'top': 0.98} # Position near the top-left corner
+
+# ----------------------------
+# COUNTDOWN SCREEN
+# ----------------------------
+<CountdownScreen@AppScreen>:
+    name: "countdown"
+    title: "Sleep Countdown"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        id: content_area
+        orientation: 'vertical'
+        # Spacing between the major groups (Title, GIF, Timer, Buttons)
+        spacing: dp(15)
+        # Extra top padding to clear status bars and move the title up
+        padding: [dp(24), dp(50), dp(24), dp(24)]
+
+        # 1. THE STATUS MESSAGE
+        # This ID must match your Python: screen.ids.status_msg.text
+        Label:
+            id: status_msg
+            text: "Waiting until your sleep time..."
+            font_size: '22sp'
+            bold: True
+            halign: "center"
+            valign: "middle"
+            color: 0.6, 0.4, 0.8, 1
+            size_hint_y: None
+            # Increased height and enabled wrapping to prevent text cut-off
+            height: dp(90)
+            text_size: self.width, None
+
+        # 2. THE ANIMATED GIF SLOT
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'center'
+            size_hint_y: 1 # Takes up flexible remaining space
+            Image:
+                id: countdown_gif
+                source: "UI/images/countdown.gif"
+                anim_delay: 0.1
+                allow_stretch: True
+                keep_ratio: True
+
+        # 3. THE COUNTDOWN TIMER
+        # Used for the 00:00:00 numeric display
+        Label:
+            id: countdown_label
+            text: "00:00:00"
+            font_size: '32sp'
+            bold: True
+            halign: "center"
+            valign: "middle"
+            color: 0.4, 0.4, 0.4, 1
+            size_hint_y: None
+            height: dp(60)
+
+        # 4. ACTION BUTTONS
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: dp(12)
+            size_hint_y: None
+            height: self.minimum_height
+
+            IOSButton:
+                text: "Refuse to Sleep / Extend Time"
+                on_release: app.switch("extend")
+
+            IOSButton:
+                text: "Back to Home"
+                on_release: app.go_back()
+
+# ----------------------------
+# EXTEND SCREEN (Fixed Centering)
+# ----------------------------
+<ExtendScreen@AppScreen>:
+    name: "extend"
+    title: "Extend Light On"
+
+    GradientBackground:
+        id: bg
+
+    BoxLayout:
+        id: content_area
+        orientation: "vertical"
+        spacing: dp(20)
+        padding: [dp(24), dp(60), dp(24), dp(24)] # More top padding
+
+        # 1. QUESTION TEXT
+        Label:
+            text: "How long do you want to extend?"
+            font_size: '22sp'
+            bold: True
+            color: 0.6, 0.4, 0.8, 1
+            size_hint_y: None
+            height: dp(50)
+
+        Label:
+            text: "(Maximum 3 hours / 180 minutes)"
+            font_size: '14sp'
+            color: 0, 0, 0, 0.6
+            size_hint_y: None
+            height: dp(30)
+
+        # 2. FLEXIBLE CENTER CONTAINER
+        # Changing size_hint_y to 1 makes this section "grow"
+        # to fill the middle of the screen.
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'center'
+            size_hint_y: 1
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: None, None
+                size: dp(280), dp(220) # Slightly larger for better touch area
+                spacing: dp(15)
+
+                # labels row
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(30)
+                    Label:
+                        text: "HOUR"
+                        font_size: '16sp'
+                        bold: True
+                        color: 0, 0, 0, 0.8
+                    Label:
+                        text: "MINUTES"
+                        font_size: '16sp'
+                        bold: True
+                        color: 0, 0, 0, 0.8
+
+                # pickers row
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(20)
+                    size_hint_y: None
+                    height: dp(160)
+
+                    # ---------------- Hour Picker ----------------
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_x: None
+                        width: dp(120)
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(60), dp(60)
+                            pos_hint: {'center_x': .5}
+                            background_normal: "UI/icons/up.png" # Simplified assignment
+                            background_down: "UI/icons/up.png"
+                            on_release: app.increment_extend_hour()
+
+                        Label:
+                            id: ext_hour
+                            text: "0"
+                            font_size: '42sp'
+                            bold: True
+                            color: 0, 0, 0, 1
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(60), dp(60)
+                            pos_hint: {'center_x': .5}
+                            background_normal: "UI/icons/down.png"
+                            background_down: "UI/icons/down.png"
+                            on_release: app.decrement_extend_hour()
+
+                    # ---------------- Minute Picker ----------------
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_x: None
+                        width: dp(120)
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(60), dp(60)
+                            pos_hint: {'center_x': .5}
+                            background_normal: "UI/icons/up.png"
+                            background_down: "UI/icons/up.png"
+                            on_release: app.increment_extend_minute()
+
+                        Label:
+                            id: ext_minute
+                            text: "00"
+                            font_size: '42sp'
+                            bold: True
+                            color: 0, 0, 0, 1
+
+                        Button:
+                            size_hint: None, None
+                            size: dp(60), dp(60)
+                            pos_hint: {'center_x': .5}
+                            background_normal: "UI/icons/down.png"
+                            background_down: "UI/icons/down.png"
+                            on_release: app.decrement_extend_minute()
+
+        # 3. BUTTON AT BOTTOM
+        IOSButton:
+            text: "Confirm Extension"
+            on_release: app.confirm_extension()
+            size_hint_y: None
+            height: dp(50)
+
+# main.kv (Inside <ConsistencyScreen@AppScreen>)
+
+<ConsistencyScreen@AppScreen>:
+    name: "consistency"
+    title: "CONSISTENCY SCORE"
+
+    # Setting a solid color background (overrides inherited GradientBackground)
+    canvas.before:
+        Color:
+            rgba: 0.878, 0.949, 0.969, 1   # Light Blue/White Color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical' # Main container holding Header and Content
+
+        # Restore the Screen Header
+        ScreenHeader:
+            title: root.title
+            back_screen: "home"
+            color: 0.6, 0.4, 0.8, 1 # Title text color
+            font_size: '100sp'
+
+        BoxLayout:
+            id: content_area
+            orientation: "vertical"
+            spacing: dp(10)
+            padding: dp(20)
+            size_hint_y: 1 # Content area takes remaining space
+
+            # 1. Top Title (Overall Score Display)
+            Label:
+                id: score_label
+                text: "Your Sleep Consistency Level\n\n[size=100]--%[/size]"
+                markup: True
+                bold: True
+                color: 0, 0, 0, 1
+                size_hint_y: None
+                height: dp(120)
+                text_size: self.width, None
+                halign: 'center'
+                valign: 'middle'
+
+            # 2. Historical Chart Area Label
+            Label:
+                text: "Historical Consistency (Last 7 Days)"
+                color: 0.1, 0.1, 0.1, 0.8
+                size_hint_y: None
+                height: dp(30)
+
+            # 3. Scrollable Bar Chart (NEW STRUCTURE)
+            ScrollView:
+                size_hint_y: 1
+                do_scroll_x: True
+                do_scroll_y: False
+                padding: dp(5)
+                background_color: 0, 0, 0, 0
+
+                ConsistencyHeatBar:
+                    id: score_bar
+                    orientation: 'horizontal'
+                    size_hint_x: None
+                    height: self.parent.height
+                    width: self.minimum_width
+
+            # Spacer to push button down
+            Widget:
+                size_hint_y: 0.1
+
+            # 4. Tips Button
+            IOSButton:
+                text: "Tips to Improve (Chat with Bot)"
+                size_hint_y: None
+                height: dp(50)
+                on_release: app.switch("bot")
+
+            IOSButton:
+                text: "View Your Sleep Pet"
+                size_hint_y: None
+                height: dp(50)
+                on_release: app.switch("pet_status")
+                background_color: 0.3, 0.8, 0.3, 1
+
+# ----------------------------
+# PET STATUS & TIPS SCREEN
+# ----------------------------
+<PetStatusScreen@AppScreen>:
+    name: "pet_status" # This name matches the button switch command
+    title: "Your Sleep Companion"
+
+    GradientBackground:
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [dp(24), dp(10), dp(24), dp(24)]
+        spacing: dp(15)
+
+        # --- Large Pet Display ---
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.55
+            padding: [dp(20), dp(30), dp(20), dp(20)]
+            spacing: dp(20)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.6
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(20),]
+
+            Image:
+                # IMPORTANT: This ID is used in main.py to change the image
+                id: detail_pet_image
+                source: "UI/images/pet_neutral.gif" # Default image
+                allow_stretch: True
+                keep_ratio: True
+                size_hint_y: 0.75
+
+            Label:
+                id: detail_pet_status
+                text: "Status: Checking..."
+                font_size: '20sp'
+                bold: True
+                color: 0.3, 0.3, 0.3, 1
+                halign: 'center'
+                valign: 'top' # Center text vertically
+                size_hint_y: 0.25 # Disable hint to use fixed height
+                height: dp(80)    # Increase height for 2 lines
+                text_size: self.width, None # CRITICAL: Enables wrapping
+
+        # --- Tips Section Header ---
+        Label:
+            text: "How to keep your pet happy:"
+            font_size: '18sp'
+            bold: True
+            color: 0.6, 0.4, 0.8, 1
+            size_hint_y: None
+            height: dp(40)
+
+        # --- Scrollable Tips List ---
+        ScrollView:
+            size_hint_y: 0.35 # Takes remaining space
+            bar_width: dp(5)
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(15)
+                padding: [0, dp(10), 0, dp(20)]
+                size_hint_y: None
+                height: self.minimum_height
+
+                # Tip 1
+                IOSCard:
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: "**Consistency is Key**\nGo to bed and wake up at the same time every day."
+                        markup: True
+                        text_size: self.width - dp(20), None
+                        halign: 'left'
+                        valign: 'middle'
+                        color: 0, 0, 0, 1
+
+                # Tip 2
+                IOSCard:
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: "**Dark & Cool Room**\nEnsure your bedroom is dark and around 18-20°C."
+                        markup: True
+                        text_size: self.width - dp(20), None
+                        halign: 'left'
+                        valign: 'middle'
+                        color: 0, 0, 0, 1
+
+                # Tip 3
+                IOSCard:
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: "**No Screens Before Bed**\nAvoid phones and TVs for at least 1 hour before sleep."
+                        markup: True
+                        text_size: self.width - dp(20), None
+                        halign: 'left'
+                        valign: 'middle'
+                        color: 0, 0, 0, 1
+
+        # --- Back Button ---
+        IOSButton:
+            text: "Back to Scores"
+            on_release: app.go_back()
+
+<ChatBubble>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [dp(10), dp(5)]
+    spacing: dp(10)
+    # Bot Avatar logic
+    Image:
+        source: root.avatar if root.is_bot else ''
+        size_hint: (None, None)
+        size: (dp(40), dp(40)) if root.is_bot else (0, 0)
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: 0.75
+        size_hint_y: None
+        height: self.minimum_height
+        padding: [dp(12), dp(12)]
+        canvas.before:
+            Color:
+                rgba: (0.2, 0.23, 0.3, 1) if root.is_bot else (0.3, 0.5, 0.9, 1)
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(15), dp(15), dp(15), dp(2)] if root.is_bot else [dp(15), dp(15), dp(2), dp(15)]
+        Label:
+            text: root.message
+            text_size: self.width, None
+            size_hint_y: None
+            height: self.texture_size[1]
+        Image:
+            source: root.image_path
+            size_hint_y: None
+            height: dp(160) if root.image_path else 0
+
+<BotScreen>:
+    name: "bot"
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.95, 0.95, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # --- HEADER WITH BACK BUTTON ---
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: [dp(10), dp(5)]
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1 # White header background
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "< Back"
+                size_hint: None, None
+                size: dp(80), dp(40)
+                pos_hint: {'center_y': 0.5}
+                background_normal: ''
+                background_color: 0.2, 0.4, 0.8, 1 # Blue theme
+                on_release: app.switch("home", direction='right')
+
+            Label:
+                text: "Sleep Assistant"
+                color: 0, 0, 0, 1
+                bold: True
+                font_size: dp(18)
+                halign: 'center'
+
+            Widget: # Spacer to balance the header
+                size_hint_x: None
+                width: dp(80)
+
+        # --- CHAT CONTENT ---
+        ScrollView:
+            id: chat_scroll
+            size_hint_y: 1
+            BoxLayout:
+                id: chat_history
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(15)
+                spacing: dp(15)
+
+        # --- OPTIONS AREA ---
+        BoxLayout:
+            id: options_layout
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            padding: [dp(10), dp(10), dp(10), dp(20)]
+            spacing: dp(8)
